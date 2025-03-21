@@ -1,38 +1,104 @@
-// Importeer het npm package Express (uit de door npm aangemaakte node_modules map)
-// Deze package is geïnstalleerd via `npm install`, en staat als 'dependency' in package.json
-import express from 'express'
+import express from "express";
+import { Liquid } from "liquidjs";
+import fetch from "node-fetch"; // Required for fetch in Node.js
 
-// Importeer de Liquid package (ook als dependency via npm geïnstalleerd)
-import { Liquid } from 'liquidjs';
+const app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 
-// Maak een nieuwe Express applicatie aan, waarin we de server configureren
-const app = express()
-
-// Maak werken met data uit formulieren iets prettiger
-app.use(express.urlencoded({extended: true}))
-
-// Gebruik de map 'public' voor statische bestanden (resources zoals CSS, JavaScript, afbeeldingen en fonts)
-// Bestanden in deze map kunnen dus door de browser gebruikt worden
-app.use(express.static('public'))
-
-// Stel Liquid in als 'view engine'
 const engine = new Liquid();
-app.engine('liquid', engine.express());
+app.engine("liquid", engine.express());
+app.set("view engine", "liquid");
+app.set("views", "./views");
 
-// Stel de map met Liquid templates in
-// Let op: de browser kan deze bestanden niet rechtstreeks laden (zoals voorheen met HTML bestanden)
-app.set('views', './views')
+const baseApiEndpoint = "https://fdnd-agency.directus.app/items";
 
+const avlWebinarsEndpoint = `${baseApiEndpoint}/avl_webinars`;
+const avlWebinarFieldsFilter =
+  "?fields=id,duration,title,thumbnail,categories.*.*,speakers.*.*";
 
-console.log('Let op: Er zijn nog geen routes. Voeg hier dus eerst jouw GET en POST routes toe. De instructies staan in de leertaak.')
+const avlMessagesEndpoint = `${baseApiEndpoint}/avl_messages`;
+const avlMessagesFilter = "?filter[for][_eq]=Bookmark for Jane Doe";
 
+// Fetch webinars list
+async function fetchWebinarsList() {
+  const webinarsResponse = await fetch(
+    avlWebinarsEndpoint + avlWebinarFieldsFilter
+  );
+  const webinarResponseJSON = await webinarsResponse.json();
 
-// Stel het poortnummer in waar Express op moet gaan luisteren
-// Lokaal is dit poort 8000; als deze applicatie ergens gehost wordt, waarschijnlijk poort 80
-app.set('port', process.env.PORT || 8000)
+  return webinarResponseJSON.data.map((webinar) => ({
+    id: webinar.id,
 
-// Start Express op, gebruik daarbij het zojuist ingestelde poortnummer op
-app.listen(app.get('port'), function () {
-  // Toon een bericht in de console en geef het poortnummer door
-  console.log(`Daarna kun je via http://localhost:${app.get('port')}/ jouw interactieve website bekijken.\n\nThe Web is for Everyone. Maak mooie dingen 🙂`)
-})
+    title: webinar.title,
+    duration: webinar.duration,
+    thumbnail: webinar.thumbnail,
+    categories: webinar.categories,
+    speakers: webinar.speakers,
+  }));
+}
+
+// Fetch bookmarks
+async function fetchBookmarkedWebinars() {
+  const bookmarksResponse = await fetch(
+    avlMessagesEndpoint + avlMessagesFilter
+  );
+  const { data: bookmarks } = await bookmarksResponse.json();
+
+  const bookmarkedWebinarIds = new Set(
+    bookmarksResponseJSON.data.map((item) => String(item.text))
+  );
+
+  const webinars = await fetchWebinarsList();
+  const bookmarkedWebinars = webinars.filter((webinar) =>
+    bookmarkedWebinarIds.has(String(webinar.id))
+  );
+
+  return { bookmarkedWebinars, bookmarks };
+}
+
+// Route to display webinars
+app.get("/webinars", async (req, res) => {
+  const webinarsList = await fetchWebinarsList();
+  res.render("webinars.liquid", { webinars: webinarsList });
+});
+
+// Route to display bookmarked webinars
+app.get("/bookmarks", async (req, res) => {
+  const { bookmarkedWebinars, bookmarks } = await fetchBookmarkedWebinars();
+  res.render("bookmarks.liquid", { webinars: bookmarkedWebinars, bookmarks });
+});
+
+// Route to handle bookmarking a webinar
+app.post("/webinars", async (req, res) => {
+  const { textField, forField } = req.body;
+
+  const newBookmark = {
+    text: textField,
+    for: forField,
+  };
+
+  try {
+    await fetch(avlMessagesEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newBookmark),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to bookmark: ${response.statusText}`);
+    }
+
+    res.redirect("/webinars");
+  } catch (error) {
+    console.error("Error saving bookmark:", error);
+    res.status(500).send("Error saving bookmark.");
+  }
+});
+
+app.set("port", process.env.PORT || 8000);
+app.listen(app.get("port"), () => {
+  console.log(`App is running on http://localhost:${app.get("port")}`);
+});
