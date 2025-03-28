@@ -1,36 +1,36 @@
-{% render "partials/head.liquid" %}
-   {% render 'partials/header.liquid', categories: categories %}
+{% comment %} core functionaliteit: het tonen van een lijst van webinars  {% endcomment %}
 
+{% render "partials/head.liquid" %}
+{% render 'partials/header.liquid', categories: categories %}
 
 <div class="webinars-container">
-    {% for webinar in webinars %}
-        <div class="webinar-card">
-            <img src="https://fdnd-agency.directus.app/assets/{{ webinar.thumbnail }}" 
-                 alt="An image that shows the webinar category" 
-                 class="oncollaberation-webinar-thumbnail" 
-                 width="200px">
-            
-            <div class="webinar-info">
-                <h3 class="webinar-title">{{ webinar.title }}</h3>
-                <p class="webinar-duration">{{ webinar.duration }}</p>
-                
-                {% for speaker in webinar.speakers %}
-                    <h3 class="webinar-speakers-name">{{ speaker.avl_speakers_id.fullname }}</h3>
-                {% endfor %}
-                
-                {% for category in webinar.categories %}
-                    <p class="categorie-box">{{ category.avl_categories_id.name }}</p>
-                {% endfor %}
-                
-                <!-- Bookmark button -->
-                <form method="post" action="/webinars">
-                    <input type="hidden" name="textField" value="{{ webinar.id }}">
-                    <input type="hidden" name="forField" value="hello boodbye">
-                    <button type="submit">Bookmark</button>  
-                </form>
-            </div>
-        </div>
-    {% endfor %}
+   {% for webinar in webinars %}
+  <article class="webinar-card">
+<div class="webinar-thumbnail-container">
+    <img
+      src="https://fdnd-agency.directus.app/assets/{{ webinar.thumbnail }}"
+      alt="An image that shows the webinar thumbnail."
+      class="webinar-thumbnail"
+    />
+    <span class="webinar-duration">{{ webinar.duration }}</span> 
+  </div>
+    <section class="webinar-content">
+      <h3 class="webinar-title">{{ webinar.title }}</h3>
+    
+
+      {% for speaker in webinar.speakers %}
+      <h4 class="webinar-speakers-name">
+        {{ speaker.avl_speakers_id.fullname }}
+      </h4>
+      {% endfor %} 
+      
+
+      {% for category in webinar.categories %}
+      <p class="categorie-box">{{ category.avl_categories_id.name }}</p>
+      {% endfor %}
+    </section>
+    
+  </article>
+  {% endfor %}
 </div>
 
-<a href="/bookmarks">View Bookmarked Webinars</a>
