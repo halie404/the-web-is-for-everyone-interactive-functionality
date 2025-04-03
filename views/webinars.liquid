@@ -7,7 +7,7 @@
 
 
   <div class="webinars-container">
-
+    {% if hasWebinars %} {% for webinar in webinars %}
     <article class="webinar-card">
 <fig class="webinar-thumbnail-container">
   <img
@@ -60,7 +60,8 @@
         </div>
       </section>
     </article>
-    {% endfor %} 
- 
+    {% endfor %} {% else %}
+    <p class="empty-state-message">No webinars available in this category.</p>
+    {% endif %}
   </div>
 </body>
