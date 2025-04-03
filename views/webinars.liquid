@@ -1,36 +1,41 @@
-{% comment %} core functionaliteit: het tonen van een lijst van webinars  {% endcomment %}
+{% render "partials/head.liquid" %} {% render
+'partials/header.liquid'%}
+<body>
+  {% render 'partials/hero.liquid'%} {% render 'partials/categories.liquid',
+  categories: categories %}
 
-{% render "partials/head.liquid" %}
-{% render 'partials/header.liquid', categories: categories %}
 
-<div class="webinars-container">
-   {% for webinar in webinars %}
-  <article class="webinar-card">
-<div class="webinar-thumbnail-container">
-    <img
-      src="https://fdnd-agency.directus.app/assets/{{ webinar.thumbnail }}"
-      alt="An image that shows the webinar thumbnail."
-      class="webinar-thumbnail"
-    />
-    <span class="webinar-duration">{{ webinar.duration }}</span> 
-  </div>
-    <section class="webinar-content">
-      <h3 class="webinar-title">{{ webinar.title }}</h3>
-    
 
-      {% for speaker in webinar.speakers %}
-      <h4 class="webinar-speakers-name">
-        {{ speaker.avl_speakers_id.fullname }}
-      </h4>
-      {% endfor %} 
-      
+   <div class="webinars-container">
+  <fig class="webinar-thumbnail-container">
+  <img
+    src="https://fdnd-agency.directus.app/assets/{{ webinar.thumbnail }}"
+    alt="An image that shows the webinar thumbnail."
+    class="webinar-thumbnail"
+  />
+  <figcaption>
+    <span class="webinar-duration">{{ webinar.duration }}</span>
+  </figcaption>
+</fig>
 
-      {% for category in webinar.categories %}
-      <p class="categorie-box">{{ category.avl_categories_id.name }}</p>
-      {% endfor %}
-    </section>
-    
-  </article>
-  {% endfor %}
+
+      <section class="webinar-content">
+        <h3 class="webinar-title">{{ webinar.title }}</h3>
+
+        <div class="speakers">
+          {% for speaker in webinar.speakers %}
+          <h4 class="webinar-speakers-name">
+            {{ speaker.avl_speakers_id.fullname }}
+          </h4>
+          {% endfor %}
+        </div>
+   </div>
+
+        <div class="btn-wrapper">
+          <div class="categories">
+            {% for category in webinar.categories %}
+            <p class="categorie-box">{{ category.avl_categories_id.name }}</p>
+            {% endfor %}
+          </div>
+            </section>
 </div>
-
