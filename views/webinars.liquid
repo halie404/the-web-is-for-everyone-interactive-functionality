@@ -6,8 +6,10 @@
 
 
 
-   <div class="webinars-container">
-  <fig class="webinar-thumbnail-container">
+  <div class="webinars-container">
+
+    <article class="webinar-card">
+<fig class="webinar-thumbnail-container">
   <img
     src="https://fdnd-agency.directus.app/assets/{{ webinar.thumbnail }}"
     alt="An image that shows the webinar thumbnail."
@@ -17,7 +19,6 @@
     <span class="webinar-duration">{{ webinar.duration }}</span>
   </figcaption>
 </fig>
-
 
       <section class="webinar-content">
         <h3 class="webinar-title">{{ webinar.title }}</h3>
@@ -29,7 +30,6 @@
           </h4>
           {% endfor %}
         </div>
-   </div>
 
         <div class="btn-wrapper">
           <div class="categories">
@@ -37,5 +37,30 @@
             <p class="categorie-box">{{ category.avl_categories_id.name }}</p>
             {% endfor %}
           </div>
-            </section>
-</div>
+
+          <form action="/bookmark" method="post" class="bookmark-form">
+            <input type="text" value="{{ webinar.id }}" name="id" hidden />
+            <input type="text" value="Jane Doe" name="name" hidden />
+            <button type="submit" class="bookmark-button">
+              {% if webinar.id in bookmarkedWebinarsSet %}
+              <img
+                src=" /assets/Vector (10).svg"
+                alt="Bookmarked"
+                class="bookmark-icon"
+              />
+              {% else %}
+              <img
+                src="/assets/Vector (10).svg"
+                alt="Bookmark"
+                class="bookmark-icon"
+              />
+              {% endif %}
+            </button>
+          </form>
+        </div>
+      </section>
+    </article>
+    {% endfor %} 
+ 
+  </div>
+</body>
